@@ -1,7 +1,6 @@
-from detector.detector import Detector
-from microphone.microphone import Microphone
-from socket.socket import Socket
-from speaker.speaker import Speaker
+from detector import detector
+from microphone import microphone
+from speaker import speaker
 
 SOCKET_URL = 'TBD'
 DEV_MODE = 1
@@ -9,13 +8,13 @@ DEV_MODE = 1
 
 class Bro:
 	def __init__(self):
-		self.hotword = 'Bro'
-		self.detector = Detector()
-		self.speaker = Speaker()
-		self.socket = Socket()
-		self.mic = Microphone()
+		self.hotword = '윤석열'
+		self.detector = detector.Detector()
+		self.speaker = speaker.Speaker()
+		# self.socket = socket()
+		self.mic = microphone.Microphone()
 
-		self.socket.connect(SOCKET_URL)
+		# self.socket.connect(SOCKET_URL)
 		self.message_queue = []
 
 	def handle_message_queue(self):
@@ -41,17 +40,16 @@ class Bro:
 		# record user's voice
 		sentence = self.mic.record()
 
-		self.socket.emit('bro', {
-			'message': sentence,
-			'msg_type': 2
-		})
+	# self.socket.emit('bro', {
+	# 	'message': sentence,
+	# 	'msg_type': 2
+	# })
 
 	def run(self):
-		self.detector.detect(self.hotword, self.listen)
-
 		while True:
-			socket_message = self.socket.listen()  # this method waits for incoming messages
-			self.handle_socket_message(socket_message)
+			self.detector.detect(self.hotword, self.listen)
+		# socket_message = self.socket.listen()  # this method waits for incoming messages
+		# self.handle_socket_message("socket_message")
 
 
 if __name__ == "__main__":
