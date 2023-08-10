@@ -1,14 +1,18 @@
-import socketio
+from socket import *
 
 from detector import detector
 from microphone import microphone
 from speaker import speaker
 
-SOCKET_URL = 'https://ssamko.tistory.com/29'
 DEV_MODE = 1
 
-sio = socketio.Client()
-sio.connect(SOCKET_URL)
+HOST = '117.16.137.205'
+PORT = 8080
+BUFSIZE = 1024
+ADDR = (HOST, PORT)
+
+clientSocket = socket(AF_INET, SOCK_STREAM)
+clientSocket.connect(ADDR)
 
 
 class Bro:
@@ -37,7 +41,6 @@ class Bro:
 	def turn_off(self):
 		pass
 
-	@sio.event
 	def message_handler(self, data):
 		print('I received a message!')
 		print(data)
@@ -48,7 +51,7 @@ class Bro:
 		# record user's voice
 		sentence = self.mic.record()
 
-		sio.emit('ASDF', {'foo': 'bar'})
+		clientSocket.send('Hello!'.encode())
 
 	def run(self):
 		while True:
