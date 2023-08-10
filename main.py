@@ -1,18 +1,10 @@
-from socket import *
+import websocket
 
 from detector import detector
 from microphone import microphone
 from speaker import speaker
 
 DEV_MODE = 1
-
-HOST = '117.16.137.205'
-PORT = 8080
-BUFSIZE = 1024
-ADDR = (HOST, PORT)
-
-clientSocket = socket(AF_INET, SOCK_STREAM)
-clientSocket.connect(ADDR)
 
 
 class Bro:
@@ -21,8 +13,12 @@ class Bro:
 		self.detector = detector.Detector()
 		self.speaker = speaker.Speaker()
 		self.mic = microphone.Microphone()
+		self.ws = websocket.WebSocket()
 
 		self.message_queue = []
+		self.ws.connect("ws://117.16.137.205:8080/client")
+
+		print(self.ws.recv())
 
 	def handle_message_queue(self):
 		while self.message_queue:
@@ -51,11 +47,13 @@ class Bro:
 		# record user's voice
 		sentence = self.mic.record()
 
-		clientSocket.send('Hello!'.encode())
+		# ws.send("Hello, Server")
+
+		pass
 
 	def run(self):
-		while True:
-			self.detector.detect(self.hotword, self.listen)
+		# while True:
+		self.detector.detect(self.hotword, self.listen)
 
 
 if __name__ == "__main__":
