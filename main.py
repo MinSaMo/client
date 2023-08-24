@@ -1,24 +1,26 @@
 import websocket
 
 from detector import detector
-from microphone import microphone
 from speaker import speaker
 
-DEV_MODE = 1
+DEV_MODE = 0
+WS_URL = 'ws://117.16.137.205:8080/client'
 
 
 class Bro:
 	def __init__(self):
-		self.hotword = '윤석열'
+		websocket.enableTrace(True)
+
+		self.hotword = '바로'
 		self.detector = detector.Detector()
 		self.speaker = speaker.Speaker()
-		self.mic = microphone.Microphone()
-		self.ws = websocket.WebSocket()
+		self.ws = websocket.WebSocketApp(WS_URL, on_message=self.on_message)
 
 		self.message_queue = []
-		self.ws.connect("ws://117.16.137.205:8080/client")
+		self.ws.run_forever()
 
-		print(self.ws.recv())
+	def on_message(self, msg):
+		print(msg)
 
 	def handle_message_queue(self):
 		while self.message_queue:
@@ -31,29 +33,15 @@ class Bro:
 			self.message_queue.append(message['message'])
 			self.handle_message_queue()
 
-	def turn_on(self):
-		pass
-
-	def turn_off(self):
-		pass
-
-	def message_handler(self, data):
-		print('I received a message!')
-		print(data)
-
-	def listen(self):
-		self.speaker.speak('네, 말씀하세요.')
-
-		# record user's voice
-		sentence = self.mic.record()
-
-		# ws.send("Hello, Server")
-
-		pass
-
 	def run(self):
-		# while True:
-		self.detector.detect(self.hotword, self.listen)
+		while True:
+
+			if len(self.message_queue) > 0:
+				pass
+			else:
+				spoken_sentence = self.detector.detect(self.hotword)
+				# send spoken_sentence via socket
+				pass
 
 
 if __name__ == "__main__":
