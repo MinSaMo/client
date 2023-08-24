@@ -4,9 +4,17 @@ import speech_recognition as sr
 class Detector:
 	def __init__(self):
 		self.r = sr.Recognizer()
+		print(sr.Microphone.list_microphone_names())
+		self.mic = sr.Microphone(device_index=2)
 
-	def detect(self, hotword: str, callback_func):
+	def detect(self, hotword: str):
 		print("Listening for hotword...")
+
+		response = {
+			"success": True,
+			"error": None,
+			"transcription": None
+		}
 
 		from main import DEV_MODE
 		if DEV_MODE == 1:
@@ -19,20 +27,20 @@ class Detector:
 
 			if hotword in spoken_text:
 				print(f"Hotword '{hotword}' detected!")
-				callback_func()
 
 		else:
-			with sr.Microphone() as source:
-				try:
-					audio = self.r.listen(source, timeout=5)
-					spoken_text = self.r.recognize_google(
-						audio, language="ko-KR").lower()
-					if hotword in spoken_text:
-						print(f"Hotword '{hotword}' detected!")
-						callback_func()
-				except sr.UnknownValueError:
-					print("Could not understand audio")
-				except sr.RequestError as e:
-					print(f"Error with the Google API request; {e}")
-				except KeyboardInterrupt:
-					print("Listening stopped.")
+			with self.mic as source:
+				self.r.adjust_for_ambient_noise(source)
+				audio = self.r.listen(source)
+
+			try:
+				response["transcription"] = self.r.recognize_google(audio, language='ko-KR')
+			except sr.RequestError:
+				# API was unreachable or unresponsive
+				response["success"] = False
+				response["error"] = "API unavailable"
+			except sr.UnknownValueError:
+				# speech was unintelligible
+				response["error"] = "Unable to recognize speech"
+
+			print(response)
