@@ -1,5 +1,3 @@
-import time
-
 import speech_recognition as sr
 
 
@@ -22,13 +20,10 @@ class Detector:
 		if DEV_MODE == 1:
 			try:
 				response["transcription"] = 'REST API에 대해 설명해줘'
-				# API was unreachable or unresponsive
-				response["success"] = False
-				response["error"] = "API unavailable"
+				response["success"] = True
 			except sr.UnknownValueError:
-				# speech was unintelligible
 				response["error"] = "Unable to recognize speech"
-			time.sleep(10)
+				response["success"] = False
 		else:
 			with self.mic as source:
 				self.r.adjust_for_ambient_noise(source)
@@ -37,11 +32,10 @@ class Detector:
 			try:
 				response["transcription"] = self.r.recognize_google(audio, language='ko-KR')
 			except sr.RequestError:
-				# API was unreachable or unresponsive
 				response["success"] = False
 				response["error"] = "API unavailable"
 			except sr.UnknownValueError:
-				# speech was unintelligible
+				response["success"] = False
 				response["error"] = "Unable to recognize speech"
 
 		return response
